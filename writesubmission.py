@@ -7,7 +7,7 @@ def writesubmission(ids, y_hat, filename):
         return False
 
     for idx in range(len(ids)):
-        out.write('{0},{1}\n'.format(ids[idx], y_hat[idx]))
+        out.write('{0},{1}\n'.format(int(ids[idx]), y_hat[idx][1]))
 
     out.close()
     return True
