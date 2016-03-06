@@ -1,4 +1,4 @@
-import loaddata
+from loaddata import load_data
 import writesubmission
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import Imputer
@@ -10,8 +10,7 @@ imputer = Imputer()
 
 start = time.time()
 print 'Loading data...'
-train_data = loaddata.train_data()
-test_data = loaddata.test_data()
+train_data, test_data = load_data()
 print '...done loading data. Took {0} seconds'.format(time.time() - start)
 
 print 'Imputing missing X values in training data...'
@@ -36,5 +35,7 @@ print '...predictions generated. Took {0} seconds'.format(time.time() - start)
 
 start = time.time()
 print 'Writing output...'
-writesubmission.writesubmission(test_data['ids'], y_hat, 'logistic-regression-output.csv')
+writesubmission.writesubmission(
+    test_data['ids'], y_hat, 'logistic-regression-output.csv'
+)
 print '...output written. Took {0} seconds'.format(time.time() - start)

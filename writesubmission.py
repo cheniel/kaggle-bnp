@@ -1,7 +1,7 @@
 def writesubmission(ids, y_hat, filename):
     out = open(filename, 'w')
     out.write('Id,PredictedProb\n')
-    
+
     if len(ids) != len(y_hat):
         print 'Ids and y_hat need to be the same length.'
         return False
