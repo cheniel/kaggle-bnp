@@ -42,6 +42,6 @@ print '...predictions generated. Took {0} seconds'.format(time.time() - start)
 start = time.time()
 print 'Writing output...'
 write_submission(
-    test_data['ids'], y_hat, 'logistic-regression-output.csv'
+    test_data['ids'], y_hat[:, 1], 'logistic-regression-output.csv'
 )
 print '...output written. Took {0} seconds'.format(time.time() - start)
