@@ -46,6 +46,14 @@ def load_data():
     )
 
 
+def cv_error(x_train, y_train, train_func, predict_func, eval_func, t_ratio=0.2):
+    x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, test_size=t_ratio)
+    model = train_func(x_train, y_train)
+    y_hat = predict_func(x_valid)
+    error = eval_func(y_valid, y_hat)
+    return error
+
+
 def write_submission(ids, yprob, filename):
     out = open(filename, 'w')
     out.write('Id,PredictedProb\n')
