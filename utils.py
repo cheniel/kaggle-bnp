@@ -2,6 +2,7 @@ import numpy as np
 import csv
 import re
 from sklearn.preprocessing import OneHotEncoder
+from sklearn.cross_validation import train_test_split
 
 LABELS_TO_REMOVE = [
     'v22'  # categorical with 23420 unique values... some sort of name I guess?
@@ -39,8 +40,12 @@ def load_data():
 
     x_train, x_test = _convert_categorical_data(x_train, x_test)
 
+    cv_ratio = 0.2
+    ids_train, ids_valid, x_train, x_valid, y_train, y_valid = train_test_split(ids_train, x_train, y_train, test_size=cv_ratio)
+
     return (
         {'ids': ids_train, 'y': y_train, 'x': x_train, },
+        {'ids': ids_valid, 'y': y_valid, 'x': x_valid, },
         {'ids': ids_test, 'x': x_test, },
     )
 
