@@ -2,7 +2,7 @@ import numpy as np
 import csv
 import re
 from sklearn.preprocessing import OneHotEncoder
-from sklearn.cross_validation import train_test_split
+from sklearn.cross_validation import train_test_split, KFold
 
 LABELS_TO_REMOVE = [
     'v22'  # categorical with 23420 unique values... some sort of name I guess?
@@ -46,8 +46,10 @@ def load_data():
     )
 
 
-def cv_error(x_train, y_train, train_func, predict_func, eval_func, prepare_func=None, t_ratio=0.2):
-    x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, test_size=t_ratio)
+def cv_random_subsample(x_train, y_train, train_func, predict_func, eval_func, prepare_func=None, t_ratio=0.2):
+    x_train, x_valid, y_train, y_valid = train_test_split(
+        x_train, y_train, test_size=t_ratio
+    )
     if prepare_func:
         x_train, y_train = prepare_func(x_train, y_train)
         x_valid, y_valid = prepare_func(x_valid, y_valid)
@@ -55,6 +57,27 @@ def cv_error(x_train, y_train, train_func, predict_func, eval_func, prepare_func
     y_hat = predict_func(model, x_valid)
     error = eval_func(y_valid, y_hat)
     return error
+
+
+def cv_kfold_cross_validation(x, y, train_func, predict_func, eval_func, k=2, prepare_func=None):
+    kf = KFold(x.shape[0], n_folds=k)
+    errors = []
+
+    for train_index, test_index in kf:
+        x_train, x_test = x[train_index], x[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+
+        if prepare_func:
+            x_train, y_train = prepare_func(x_train, y_train)
+            x_test, y_test = prepare_func(x_test, y_test)
+
+        model = train_func(x_train, y_train)
+        y_hat = predict_func(model, x_test)
+        error = eval_func(y_test, y_hat)
+        print("ERROR:", error)
+        errors.append(error)
+
+    return sum(errors) / len(errors)
 
 
 def write_submission(ids, yprob, filename):
