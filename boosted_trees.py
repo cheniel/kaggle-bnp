@@ -164,12 +164,19 @@ def _export_single_example(train_data, test_data, param, num_round):
     print '...Took {} seconds'.format(time() - start)
 
     start = time()
+    print 'Writing train output...'
+    write_submission(
+        train_data['ids'], y_hat_train, 'train-boosted_trees-{}.csv'.format(datetime.now())
+    )
+    print '...output written. Took {0} seconds'.format(time() - start)
+
+    start = time()
     print 'Generating testing predictions...'
     y_hat_test = predict_boosted_trees(classifier, xg_test)
     print '...predictions generated. Took {0} seconds'.format(time() - start)
 
     start = time()
-    print 'Writing output...'
+    print 'Writing test output...'
     write_submission(
         test_data['ids'], y_hat_test, 'boosted_trees-{}.csv'.format(datetime.now())
     )
