@@ -50,20 +50,14 @@
 
 \newcommand{\myraise}{\vspace{-.15cm}}
 
-\newcommand{\problem}[3]{
- \begin{minipage}{\textwidth}
- \noindent{\large {\bf Problem #1:} #2}
- #3
- \end{minipage}
- \vspace{2\baselineskip}
-}
-
+\raggedbottom
 \begin{document}
-
+\clearpage
+\thispagestyle{empty}
 \centerline{\Large {\bf Team DAB: } CS74/174 Homework \#3}
 \centerline{Machine Learning and Statistical Data Analysis: Winter 2016}
 \centerline{{\bf D}aniel Chen, {\bf A}ndrew Kim, {\bf B}enjamin Packer}
-\vspace{1cm}
+% \vspace{1cm}
 
 % Your team will produce a single write-up PDF document, approximately 6 pages long, and less than 8 pages. You report will describe the problem you chose to tackle and the methods you used to address it, including which model(s) you tried, how you trained them, how you selected any parameters they might require, and how they performed in on the test data. Consider including tables of performance
 % of different approaches, or plots of performance used to perform model selection (i.e., parameters that control complexity). Please report your leaderboard result in your report as well.
@@ -76,31 +70,150 @@
 
 \tableofcontents
 \newpage
+\clearpage
+\setcounter{page}{1}
 
 \section{Introduction}
   % overview of the problem
   % what we did
 
-\section{The Problem}
+  This project worked on finding a solution to the BNP Paribas Cardif Claims Management Kaggle competition. The competition is to use machine learning algorithms to effectively classify claims with anonymized data into two classes with minimal error:
 
-  \subsection{Evaluation}
+  \begin{enumerate}
+    \item claims for which approval could be accelerated leading to faster payments
+    \item claims for which additional information is required before approval
+  \end{enumerate}
+
+  The purpose of this classification is to allow BNP Paribas Cardif to accelerate its claims process and provide a better service to its customers.
+
+  Error on both Kaggle and as presented in this paper is measured through Log Loss:
+
+  \[ \text{logloss} = - \frac{1}{N} \sum\limits_{i=1}^N (y_i \log(p_i) + (1 - y_i) \log(1 - p_i)) \]
+
+  $N$ is the number of observations, $log$ is the natural log, $y_i$ is the binary target and $p_i$ is the predicted probability that $y_i = 1$
+
+  In the end, our solution is a ensemble of logistic regression, neural networks, and boosted trees. Our best testing error is XXXX, which ranks XXXX on the leaderboard.
 
 \section{The Data}
   % overview of the data
 
+  The data given is split into training and testing. The sets are the same, except we do not know the expected targets on the testing data (Kaggle retains this information to prevent cheating).
+
+  The training set consists of 114,321 examples while the test set contains 166,607. Each example consists of 131 features, 19 which are categorical with the remaining numerical. The features are all anonymized, so we don't know what the data means.
+
   \subsection{Analysis of the Data}
-    %
+    % we could discuss this?
+    % https://www.kaggle.com/bobcz3/bnp-paribas-cardif-claims-management/exploring-bnp-data-distributions/notebook
+    % we could also do feature selection. or we could remove the section altogether, idk
 
   \subsection{One Hot Encoding}
     % Daniel will cover this
+    We originally converted our categorical features to integer values. This confused our classifiers into believing the features expressed a numerical relationship. By switching over to a one-hot-encoding of our categorical features, we were able to improve performance.
+
+    One-hot-encoding splits each feature into $n$ features, where $n$ is the number of unique values that this feature takes on in both the training and testing sets. Each of these resulting features either take on 0 or 1. For each data point, only a single feature (the one which corresponds to the value that the original categorical feature had) has the value 1. This increases the number of features, but allows for correct encoding of categorical data.
+
+    One issue with one-hot-encoding was that we had to remove one of the categorical features, v22. This is because this feature had over 1000 unique values, so it increased the number of features to a number which was computation cumbersome. We prefer the empirical increase in performance to the loss of this single feature.
+
+    Our original logistic regression without one hot encoding achieved an error of 0.49859. After switching to one-hot-encoding our error significantly to 0.48213.
 
 \section{Logistic Regression}
-  Improved by using one-hot encoding
 
 \section{Boosted Trees}
   % Daniel will cover this
 
-  \subsection{Parameter Tuning}
+  Following suggestions on the forum, we implemented boosted trees using the XGBoost library, which stands for eXtreme gradient boosting. The library is designed an optimized for boosted tree algorithms. We utilized the Python package for this library. The classifier uses an ensemble of trees.
+
+  The seven parameters that we optimize are shown below:
+
+  % http://www.analyticsvidhya.com/blog/2016/03/complete-guide-parameter-tuning-xgboost-with-codes-python/
+  \begin{description}
+    \item[max\_depth] The maximum depth of a tree in the ensemble
+    \item[min\_child\_weight] Defines the minimum sum of weights of all observations required in a child
+    \item[gamma] The minimum loss reduction required to make a split
+    \item[colsample\_bytree] The fraction of columns to be randomly sampled for each tree
+    \item[subsample] The fraction of observations to be randomly samples for each tree
+    \item[eta] The learning rate
+    \item[num\_rounds] The number of rounds
+  \end{description}
+
+  \subsection{XGBoost Parameter Tuning}
+    The parameters were tuned using two-fold cross validation. After playing around with tuning the parameters manually, we ran two large sets of parameters in an attempt to reduce error and understand the empirical relationships between the parameters.
+
+    \subsubsection{Tuning 1}
+      The first optimization iterated through all 120 combinations of these parameters:
+
+      \begin{lstlisting}
+max_depths = [2, 3, 4, 5, 6]
+min_child_weights = [1]
+gammas = [0, 1]
+colsample_bytrees = [0.5, 1]
+subsamples = [0.5, 1]
+rounds_and_eta = [(20, 0.3), (50, 0.1), (100, 0.05)]
+      \end{lstlisting}
+
+      With this, our best results are shown below:
+
+      \begin{center}
+          \begin{tabular}{ | l | l | l | l | l | l | l | l | p{5cm} |}
+          \hline
+          error & runtime & minchildweight & subsample & eta & colsamplebytree & max depth & gamma \\ \hline
+          0.468638593 & 347.661603 & 1 & 1 & 0.05 & 0.5 & 6 & 0 \\ \hline
+          0.468680062 & 346.063396 & 1 & 1 & 0.05 & 0.5 & 6 & 1 \\ \hline
+          0.468846706 & 177.2962441 & 1 & 1 & 0.1 & 0.5 & 6 & 1 \\ \hline
+          0.468898392 & 178.4002779 & 1 & 1 & 0.1 & 0.5 & 6 & 0 \\ \hline
+          0.469002588 & 661.6131201 & 1 & 1 & 0.05 & 1 & 6 & 1 \\ \hline
+          \end{tabular}
+      \end{center}
+
+      The testing error found using the best parameters from the tuning was: 0.46853
+
+    \subsubsection{Tuning 2}
+
+      Our second optimization iterated through all 24 combinations of these parameters:
+
+      \begin{lstlisting}
+max_depths = [6, 8, 10]
+min_child_weights = [1, 2]
+gammas = [0]
+colsample_bytrees = [0.5, 1]
+subsamples = [1]
+rounds_and_eta = [(200, 0.05), (300, 0.01)]
+      \end{lstlisting}
+
+      With this, our best results are shown below:
+
+      \begin{center}
+          \begin{tabular}{ | l | l | l | l | l | l | l | l | p{5cm} |}
+          \hline
+          error & runtime & minchildweight & subsample & eta & colsamplebytree & max depth & gamma \\ \hline
+          0.464182985 & 1191.265073 & 1 & 1 & 0.05 & 0.5 & 10 & 0 \\ \hline
+          0.464419596 & 1154.138998 & 2 & 1 & 0.05 & 0.5 & 10 & 0 \\ \hline
+          0.46442771 & 959.313591 & 2 & 1 & 0.05 & 0.5 & 8 & 0 \\ \hline
+          0.464540668 & 1020.961268 & 1 & 1 & 0.05 & 0.5 & 8 & 0 \\ \hline
+          0.466287292 & 760.0540562 & 2 & 1 & 0.05 & 0.5 & 6 & 0 \\ \hline
+          \end{tabular}
+      \end{center}
+
+      The testing error found using the best parameters from this tuning was: 0.47856
+
+      Since this testing error is greater than the testing error achieved from the first tuning, there is evidence that somewhere between the first tuning and the second tuning we began to overfit the training data.
+
+    \subsubsection{Final Selection of Parameters to be Ensembled}
+
+      Although we did not end up using the optimal results from our tuning, it provided valuable insights to how we can use the parameters to achieve better results. Ultimately the results from our tuning was leading us to areas where this kind of brute force technique towards parameter tuning would become too computationally expensive, as tuning 2 already took nearly 12 hours to run.
+
+      Ultimately, the parameters that we came up with were:
+      \begin{lstlisting}
+max_depths =
+min_child_weights =
+gammas =
+colsample_bytrees =
+subsamples =
+num_round =
+eta =
+      \end{lstlisting}
+
+      This gave us a testing error of XXXX. The runtime was XXXX.
 
 \section{Neural Networks}
 
@@ -114,6 +227,7 @@
   % Within your document, please try to describe to the best of your ability who was responsible for which aspects (which learners, etc.), and how the team as a whole put the ideas together. Try to be concrete, e.g., who proposed idea X; who implemented algorithm X; who wrote Section X.
 
   \subsection{Daniel Chen}
+    Daniel implemented the One Hot Encoding, which improved the performance of our classifiers by encoding the categorical data correctly. In addition, he implemented the boosted trees using XGBoost, and also ran the parameter tuning for that classifier. He assisted with the implementation of cross validation, especially K-Fold. For all of these contributions, he wrote up the corresponding sections in this report. In addition to those sections, he wrote up the introduction and data sections.
 
   \subsection{Andrew Kim}
 
