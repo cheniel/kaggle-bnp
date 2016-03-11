@@ -214,14 +214,14 @@ if __name__ == "__main__":
         'silent': 1,
         'num_class': 2,
     }
-    param['min_child_weight'] = 1
-    param['subsample'] = 1
+    # param['min_child_weight'] = 1
+    param['subsample'] = 0.75
     param['eta'] = 0.01
-    param['colsample_bytree'] = 0.5
-    param['max_depth'] = 10
-    param['gamma'] = 0
+    param['colsample_bytree'] = 0.68
+    param['max_depth'] = 7
+    # param['gamma'] = 0
 
-    num_round = 200
+    num_round = 1800
 
     _export_single_example(train_data, test_data, param, num_round)
     # _write_training_prediction(train_data, param, num_round)
