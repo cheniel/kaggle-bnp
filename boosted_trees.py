@@ -171,11 +171,36 @@ def _export_single_example(train_data, test_data, param, num_round):
     start = time()
     print 'Writing output...'
     write_submission(
-        test_data[
-            'ids'], y_hat_test, 'boosted_trees-{}.csv'.format(datetime.now())
+        test_data['ids'], y_hat_test, 'boosted_trees-{}.csv'.format(datetime.now())
     )
     print '...output written. Took {0} seconds'.format(time() - start)
 
+def _write_training_prediction(train_data, param, num_round):
+    trainer = create_custom_train_boosted_trees(param, num_round)
+    xg_train, train_y = prepare_data(train_data['x'], train_data['y'])
+
+    start = time()
+    print 'Training model...'
+    classifier = trainer(xg_train, None)
+    print '...model trained. Took {0} seconds'.format(time() - start)
+
+    start = time()
+    print 'Generating training predictions...'
+    y_hat_train = predict_boosted_trees(classifier, xg_train)
+    print '...predictions generated. Took {0} seconds'.format(time() - start)
+
+    start = time()
+    print 'Retrieving training error...'
+    error = log_loss(train_y, y_hat_train)
+    print 'TRAINING ERROR: {}'.format(error)
+    print '...Took {} seconds'.format(time() - start)
+
+    start = time()
+    print 'Writing training output...'
+    write_submission(
+        train_data['ids'], y_hat_train, 'boosted_trees-{}.csv'.format(datetime.now()), True
+    )
+    print '...output written. Took {0} seconds'.format(time() - start)
 
 if __name__ == "__main__":
 
@@ -199,5 +224,6 @@ if __name__ == "__main__":
     num_round = 200
 
     _export_single_example(train_data, test_data, param, num_round)
+    # _write_training_prediction(train_data, param, num_round)
     # _cross_validate_single_example(train_data, test_data, param, num_round)
     # _tune_parameters(train_data, test_data)

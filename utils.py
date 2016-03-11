@@ -80,8 +80,12 @@ def cv_kfold_cross_validation(x, y, train_func, predict_func, eval_func, k=2, pr
     return sum(errors) / len(errors)
 
 
-def write_submission(ids, yprob, filename):
-    out = open(filename, 'w')
+def write_submission(ids, yprob, filename, to_bag=False):
+    fn = filename
+    if to_bag:
+        fn = 'bag-of-outputs/' + fn
+
+    out = open(fn, 'w')
     out.write('Id,PredictedProb\n')
 
     if len(ids) != len(yprob):
@@ -93,6 +97,10 @@ def write_submission(ids, yprob, filename):
 
     out.close()
     return True
+
+
+def read_submission(filename):
+    return np.loadtxt(open(filename,'rb'),delimiter=',',skiprows=1)
 
 
 def _load_from_csv(filename):
