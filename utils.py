@@ -93,7 +93,7 @@ def write_submission(ids, yprob, filename, to_bag=False):
         return False
 
     for idx in range(len(ids)):
-        out.write('{0},{1}\n'.format(int(ids[idx]), yprob[idx]))
+        out.write('{0},{1}\n'.format(int(ids[idx]), str(yprob[idx])[0:2]))
 
     out.close()
     return True

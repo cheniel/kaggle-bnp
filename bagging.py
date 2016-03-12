@@ -6,14 +6,19 @@ import os
 from utils import *
 import time
 
+training = False
+testing = True
+w_hat = np.array([1.26902544, -0.17764111])
+
 # Returns a numpy array where col 1 is the ids, and col 2-n are the predictions from the models
-def collect_models_from_foler():
+def collect_models_from_folder():
     model_types = []
     models = []
     for output in os.listdir('bag-of-outputs'):
         models.append(read_submission('bag-of-outputs/{0}'.format(output)))
         model_types.append(output.split('-')[0])
 
+    print models[0].shape
     models_matrix = np.zeros((models[0].shape[0], len(models) + 1))
     models_matrix[:,0] = models[0][:,0]
 
@@ -35,46 +40,55 @@ def predict_with_weights(models, weights, num_models, num_dpoints):
     predictions = np.sum(weighted_models, axis=1)
     return predictions
 
-
 start = time.time()
 print 'Loading models from csv output...'
 (train_data, test_data) = load_data()
-(models, types) = collect_models_from_foler()
+(models, types) = collect_models_from_folder()
 num_models = models.shape[1] - 1
 num_dpoints = models.shape[0]
 print '...done. Took {0} seconds'.format(time.time() - start)
 
-for idx in range(num_models):
-    print 'Training error on model {0}:'.format(types[idx])
-    print log_loss(train_data['y'], models[:,idx + 1])
+if training:
+    for idx in range(num_models):
+        print 'Training error on model {0}:'.format(types[idx])
+        print log_loss(train_data['y'], models[:,idx + 1])
 
-start = time.time()
-print 'Weighting models and computing y_hat...'
-w0 = initialize_weights(num_models)
-y_hat = predict_with_weights(models, w0, num_models, num_dpoints)
-print '...done. Took {0} seconds'.format(time.time() - start)
+    start = time.time()
+    print 'Weighting models and computing y_hat...'
+    w0 = initialize_weights(num_models)
+    y_hat = predict_with_weights(models, w0, num_models, num_dpoints)
+    print '...done. Took {0} seconds'.format(time.time() - start)
 
 
-print 'Training error on ensemble model with default weights:'
-print log_loss(train_data['y'], y_hat)
+    print 'Training error on ensemble model with default weights:'
+    print log_loss(train_data['y'], y_hat)
 
-def weight_opt_predict(w):
-    y_hat = predict_with_weights(models, w, num_models, num_dpoints)
-    return log_loss(train_data['y'], y_hat)
+    def weight_opt_predict(w):
+        y_hat = predict_with_weights(models, w, num_models, num_dpoints)
+        return log_loss(train_data['y'], y_hat)
 
-start = time.time()
-print 'Optimizing weights...'
-results = minimize(weight_opt_predict, w0, method='nelder-mead', options={'xtol': 1e-8, 'disp': True})
-print results
-w_hat = results['x']
+    start = time.time()
+    print 'Optimizing weights...'
+    results = minimize(weight_opt_predict, w0, method='nelder-mead', options={'xtol': 1e-8, 'disp': True})
+    print results
+    w_hat = results['x']
 
-print '...done. Took {0} seconds'.format(time.time() - start)
-print 'Final weights are {0}'.format(w_hat)
+    print '...done. Took {0} seconds'.format(time.time() - start)
+    print 'Final weights are {0}'.format(w_hat)
 
-print 'Training error with best weights:'
-print weight_opt_predict(w_hat)
+    print 'Training error with best weights:'
+    print weight_opt_predict(w_hat)
+
+if testing:
+    start = time.time()
+    print 'Using w_hat {0} and computing y_hat...'.format(w_hat)
+    y_hat = predict_with_weights(models, w_hat, num_models, num_dpoints)
+    print '...done predicting. Took {0} seconds'.format(time.time() - start)
 
 start = time.time()
 print 'Writing ensemble output...'
-write_submission(models[0,:], y_hat, 'ensemble-output-{}.csv'.format(datetime.now()), False)
+if training:
+    write_submission(train_data['ids'], y_hat, 'ensemble-output-{}.csv'.format(datetime.now()), False)
+if testing:
+    write_submission(test_data['ids'], y_hat, 'ensemble-output-{}.csv'.format(datetime.now()), False)
 print '...done. Took {0} seconds'.format(time.time() - start)

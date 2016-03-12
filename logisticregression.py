@@ -4,8 +4,8 @@ from sklearn.preprocessing import Imputer
 import time
 from datetime import datetime
 
-output_y_hat_train = True
-output_y_hat_test = False
+output_y_hat_train = False
+output_y_hat_test = True
 
 # Using all default values for now
 classifier = LogisticRegression()
@@ -54,6 +54,6 @@ if output_y_hat_test:
     start = time.time()
     print 'Writing output...'
     write_submission(
-        test_data['ids'], y_hat[:, 1], 'logistic-regression-output-{}.csv'.format(datetime.now()), False
+        test_data['ids'], y_hat[:, 1], 'logistic-regression-output-{}.csv'.format(datetime.now()), True
     )
     print '...output written. Took {0} seconds'.format(time.time() - start)
