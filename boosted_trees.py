@@ -225,7 +225,7 @@ if __name__ == "__main__":
     param['subsample'] = 0.75
     param['eta'] = 0.01
     param['colsample_bytree'] = 0.68
-    param['max_depth'] = 7
+    param['max_depth'] = 10
     # param['gamma'] = 0
 
     num_round = 1800
