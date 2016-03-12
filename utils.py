@@ -1,7 +1,7 @@
 import numpy as np
 import csv
 import re
-from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import OneHotEncoder, Imputer, StandardScaler
 from sklearn.cross_validation import train_test_split, KFold
 
 LABELS_TO_REMOVE = [
@@ -42,6 +42,35 @@ def load_data():
 
     return (
         {'ids': ids_train, 'y': y_train, 'x': x_train, },
+        {'ids': ids_test, 'x': x_test, },
+    )
+
+
+def load_normalized_data(t_ratio=0.2):
+    train_data = _load_from_csv('train.csv')
+    test_data = _load_from_csv('test.csv')
+
+    ids_train = train_data[:, 0]
+    y_train = train_data[:, 1]
+    x_train = train_data[:, 2:]
+    ids_test = test_data[:, 0]
+    x_test = test_data[:, 1:]
+    x_train, x_test = _convert_categorical_data(x_train, x_test)
+
+    imputer = Imputer()
+    x_train = imputer.fit_transform(x_train)
+    x_test = imputer.fit_transform(x_test)
+
+    scaler = StandardScaler().fit(x_train)
+    x_train = scaler.transform(x_train)
+    x_test = scaler.transform(x_test)
+
+    x_train, x_valid, y_train, y_valid, ids_train, ids_valid = train_test_split(x_train, y_train,
+                                                                                ids_train, test_size=t_ratio)
+
+    return (
+        {'ids': ids_train, 'y': y_train, 'x': x_train, },
+        {'ids': ids_valid, 'y': y_valid, 'x': x_valid, },
         {'ids': ids_test, 'x': x_test, },
     )
 
@@ -93,14 +122,14 @@ def write_submission(ids, yprob, filename, to_bag=False):
         return False
 
     for idx in range(len(ids)):
-        out.write('{0},{1}\n'.format(int(ids[idx]), str(yprob[idx])[0:2]))
+        out.write('{0},{1}\n'.format(int(ids[idx]), yprob[idx]))
 
     out.close()
     return True
 
 
 def read_submission(filename):
-    return np.loadtxt(open(filename,'rb'),delimiter=',',skiprows=1)
+    return np.loadtxt(open(filename, 'rb'), delimiter=',', skiprows=1)
 
 
 def _load_from_csv(filename):
