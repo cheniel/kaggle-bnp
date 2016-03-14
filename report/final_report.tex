@@ -119,17 +119,18 @@
   \subsection{Missing Values}
     There was lots of missing data in both the testing and training sets, which was a problem for both our Logistic Regression classifier and our Neural Networks, which XGBoost could handle missing values. Our first intuition was to impute each missing data value with the mean value for each feature, which seemed to work well. 
 
-    However, we also experimented with setting the missing values to the median and mode of the missing data. Go on with results...
+    However, we also experimented with setting the missing values to the median of the missing data. Using the mean imputation strategy and our other best logistic regression parameters, we achieved a 5-fold cross validation error of $0.483757535773$. Using the median achieved an error of $0.483781376194$, which is worse by a negligible $0.000024$. The differences in the error were very small.
 
 \section{Logistic Regression}
   Logistic regression was implemented using SciKit Learn's Logistic Regression classifier, which can output a probability for a given value. It allows specification of the $C$ parameter, which is equivalent to $\frac{1}{\alpha}$, where $\alpha$ is the regularization parameter.
 
   \subsection{Logistic Regression Parameter Tuning}
-  Given a simple logistic regression model, the main parameter available to us for tuning was $\alpha$, or the regularization parameter. To find the optimal value for $\alpha$, we used 5-fold cross validation to as the objective function, and selected the $\alpha$ that best minimized it. The result was $\frac{1}{\alpha} = $, which is a slight regularization.
+  Given a simple logistic regression model, the main parameter available to us for tuning was $\alpha$, or the regularization parameter. To find the optimal value for $\alpha$, we used 5-fold cross validation to as the objective function, and selected the $\alpha$ that best minimized it. The result was $\frac{1}{\alpha} = 0.9296875$, which is a slight regularization.
 
-  \subsection{Performance and Final Selection}
+  The 5-fold cross validation error with $\frac{1}{\alpha} = 0.9296875$ was $0.483757535773$, versus the same error where $\frac{1}{\alpha} = 1$ which was $0.483758005391$. This is quite an insignificant difference, which indicates that our logistic regression classifier was not overfitting to begin with.
 
-
+  \subsection{Performance}
+  The final performance on the testing data was $0.48213$, slightly better than our best Neural Network performance but significantly worse than our best XGBoost performance. However, this does not mean the model has no utility, since it was useful as part of the final ensemble.
 
 \section{Boosted Trees}
   % Daniel will cover this
@@ -302,11 +303,12 @@ As you can see in the results, we achieved the lowest cross-validation error wit
 
 \section{Ensemble}
   \subsection{Motivation}
-  Given that we had some reason to believe our best-performing model, XGBoost, was overfitting the data, we decided to attenuate that overfitting by including it in an ensemble with the Neural Networks and Logistic Regression. Using a simple weighted average where the output is the weighted average of the outputs of the models in the ensemble, we were able to achieve a...
+  Given that we had some reason to believe our best-performing model, XGBoost, was overfitting the data, we decided to attenuate that overfitting by including it in an ensemble with the Neural Networks and Logistic Regression. Using a simple weighted average where the output is the weighted average of the outputs of the models in the ensemble, we were able to experiment with the different weights.
 
   We decided against using a boosting ensemble method, since such a method was likely to only overfit the data more. Furthermore, we were initially able to dramatically decrease our training error by optimizing the weights in the weighted average to produce the best training error using SciPy's minimization library, but then realized such a process was drastically overfitting the results of the training data when it produced a large increase in our testing result. Thus, we found that since our ensemble was chosen to correct XGBoost's overfitting, subtle and small manual manipulation of the weights from equal voting was the best way to do it.
 
-  \subsection{Chosen Weights}
+  \subsection{Results}
+  However, we were unable to improve our results beyond what XGBoost achieved. Using weights $[\frac{1}{3}, \frac{1}{3}, \frac{1}{3}]$ gave a testing error of $0.46692$ (worse than our best by $0.0099$), and using weights $[.6, .2, .2]$ gave a testing error of $0.46017$ (worse than our best by $0.0032$). Thus, it seems that as we weight the XGBoost model more in the ensemble, it achieves a better testing result, which is simply telling us that XGBoost is the best model and that the other two models do not correct whatever overfitting remains.
 
 \section{Result}
 

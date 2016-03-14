@@ -8,7 +8,10 @@ import time
 
 training = False
 testing = True
-w_hat = np.array([1.26902544, -0.17764111])
+# w_hat = np.array([1.26902544, -0.17764111])
+w_hat = None
+# w_hat = [1/float(3), 1/float(3), 1/float(3)]
+w_hat = [.6, .2, .2]
 
 # Returns a numpy array where col 1 is the ids, and col 2-n are the predictions from the models
 def collect_models_from_folder():
@@ -80,6 +83,9 @@ if training:
     print weight_opt_predict(w_hat)
 
 if testing:
+    if w_hat == None:
+        w_hat = initialize_weights(num_models)
+
     start = time.time()
     print 'Using w_hat {0} and computing y_hat...'.format(w_hat)
     y_hat = predict_with_weights(models, w_hat, num_models, num_dpoints)
