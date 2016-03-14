@@ -115,8 +115,21 @@
     One issue with one-hot-encoding was that we had to remove one of the categorical features, v22. This is because this feature had over 1000 unique values, so it increased the number of features to a number which was computation cumbersome. We prefer the empirical increase in performance to the loss of this single feature.
 
     Our original logistic regression without one hot encoding achieved an error of 0.49859. After switching to one-hot-encoding our error significantly to 0.48213.
+    
+  \subsection{Missing Values}
+    There was lots of missing data in both the testing and training sets, which was a problem for both our Logistic Regression classifier and our Neural Networks, which XGBoost could handle missing values. Our first intuition was to impute each missing data value with the mean value for each feature, which seemed to work well. 
+
+    However, we also experimented with setting the missing values to the median and mode of the missing data. Go on with results...
 
 \section{Logistic Regression}
+  Logistic regression was implemented using SciKit Learn's Logistic Regression classifier, which can output a probability for a given value. It allows specification of the $C$ parameter, which is equivalent to $\frac{1}{\alpha}$, where $\alpha$ is the regularization parameter.
+
+  \subsection{Logistic Regression Parameter Tuning}
+  Given a simple logistic regression model, the main parameter available to us for tuning was $\alpha$, or the regularization parameter. To find the optimal value for $\alpha$, we used 5-fold cross validation to as the objective function, and selected the $\alpha$ that best minimized it. The result was $\frac{1}{\alpha} = $, which is a slight regularization.
+
+  \subsection{Performance and Final Selection}
+
+
 
 \section{Boosted Trees}
   % Daniel will cover this
@@ -219,6 +232,14 @@ eta =
 
 \section{Ensemble}
 
+  \subsection{Motivation}
+  Given that we had some reason to believe our best-performing model, XGBoost, was overfitting the data, we decided to attenuate that overfitting by including it in an ensemble with the Neural Networks and Logistic Regression. Using a simple weighted average where the output is the weighted average of the outputs of the models in the ensemble, we were able to achieve a...
+
+  We decided against using a boosting ensemble method, since such a method was likely to only overfit the data more. Furthermore, we were initially able to dramatically decrease our training error by optimizing the weights in the weighted average to produce the best training error using SciPy's minimization library, but then realized such a process was drastically overfitting the results of the training data when it produced a large increase in our testing result. Thus, we found that since our ensemble was chosen to correct XGBoost's overfitting, subtle and small manual manipulation of the weights from equal voting was the best way to do it.
+
+  \subsection{Chosen Weights}
+  ...
+
 \section{Cross Validation}
 
 \section{Result}
@@ -232,6 +253,7 @@ eta =
   \subsection{Andrew Kim}
 
   \subsection{Benjamin Packer}
+    Ben implemented the missing values imputer, the process of producing an ensemble given several output csv's, some additional code to optimize the weights the ensemble assignmed each classifier, the logistic regression classifier including the parameter tuning and optimization, and the initial helper functions for reading and writing data from and to csv's. He has written the corresponding sections for the ensemble model, the logistic regression classifier, and the section on missing values.
 
 \end{document}
 
