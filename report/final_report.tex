@@ -253,7 +253,7 @@ Below are the results for different numbers of hidden units. As you can see, all
       \end{center}
 
 \subsection{Dropout}
-In order to prevent overfitting, we implemented a neural network with dropout layers. Though dropout is a technique particularly useful for deep neural networks, we tried the dropout layers to see its effect. Dropout prevents neural networks from overfitting by randomly dropping units and their connections with a probability, p .\cite{Dropout} The results are below for the same networks as above with dropout implemented in the hidden layer with probability of dropout set to 0.5. Including dropout causes the training error to decrease more slowly, but the the cross-validation error decreased for all three networks. 
+In order to prevent overfitting, we implemented a neural network with dropout layers. Though dropout is a technique particularly useful for deep neural networks, we tried the dropout layers to see its effect. Dropout prevents neural networks from overfitting by randomly dropping units and their connections with a probability, p.\cite{Dropout} The results are below for the same networks as above with dropout implemented in the hidden layer with probability of dropout set to 0.5. Including dropout causes the training error to decrease more slowly, but the the cross-validation error decreased for all three networks. 
 
       \begin{center}
           \begin{tabular}{ | l | l | l | l | p{5cm} |}
@@ -276,26 +276,24 @@ Rather than implementing PCA for feature selection and then using those features
           150 & 100 & 0.4854 & 0.48089 & 100 \\ \hline
           150 & 50 & 0.4824 & 0.48540 & 100 \\ \hline
           150 & 20 & 0.4870 & 0.48982 & 100 \\ \hline
-          % 100 & 50 & 0.4824 & 0.48540 & 100 \\ \hline
-          % 100 & 20 & 0.4824 & 0.48540 & 100 \\ \hline
-          % 100 & 10 & 0.4824 & 0.48540 & 100 \\ \hline
+          100 & 50 & 0.4866 & 0.48389 & 100 \\ \hline
+          100 & 20 & 0.4924 & 0.48718 & 100 \\ \hline
           \end{tabular}
       \end{center}
 
+As you can see in the results, we achieved the lowest cross-validation error with the neural network with 200 hidden units in the first layer and 50 units in the second layer. What was interesting was that the training log-loss error was higher than the cross-validation error for some networks. This may be because the validation set contains data that is \"easier\" to predict. 
+
 \subsection{Batch Normalization}
 
-
+200, 80D, 20D 0.4836, 0.46089, 75
+200B, 80BD, 20D, 0.0, 0.0, 
 
       \begin{center}
           \begin{tabular}{ | l | l | l | l | p{5cm} |}
           \hline
           Layer 1 Hidden Units & Layer 2 Hidden Units & cv log-loss & training log-loss & epochs \\ \hline
-          % 200 & 100 & 0.47525 & & 100 \\ \hline
           % 200 & 50 & 0.47525 & & 100 \\ \hline
-          % 200 & 20 & 0.47525 & & 100 \\ \hline
-          150 & 100 & 0.4854 & 0.48089 & 100 \\ \hline
-          150 & 50 & 0.4824 & 0.48540 & 100 \\ \hline
-          % 150 & 20 & 0.47525 & & 100 \\ \hline
+          %150 & 50 & 0.4854 & 0.48089 & 100 \\ \hline
           % 100 & 50 & 0.4824 & 0.48540 & 100 \\ \hline
           % 100 & 20 & 0.4824 & 0.48540 & 100 \\ \hline
           % 100 & 10 & 0.4824 & 0.48540 & 100 \\ \hline
