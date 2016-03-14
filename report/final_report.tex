@@ -92,7 +92,7 @@
 
   $N$ is the number of observations, $log$ is the natural log, $y_i$ is the binary target and $p_i$ is the predicted probability that $y_i = 1$
 
-  In the end, our solution is a ensemble of logistic regression, neural networks, and boosted trees. Our best testing error is XXXX, which ranks XXXX on the leaderboard.
+  In the end, our solution is a ensemble of logistic regression, neural networks, and boosted trees. Our best testing error is 0.45695, which ranks 490 on the leaderboard.
 
 \section{The Data}
   % overview of the data
@@ -234,6 +234,8 @@ eta = 0.01
 \section{Neural Networks}
 The Kaggle forums indicated that there was not much success using neural networks for this dataset. However, we attempted to build neural network models to help build the ensemble and to gain experience building neural nets. We trained a variety of different neural network architectures using the Theano Python libraries. We also used Lasagne which is a module built on top of Theano. All of the neural network structures has 498 input units and 2 output units. The 2 output units are softmax units, which have output between 0 and 1. We used rectified linear units (ReLU) in the hidden layer because we trained deep neural networks, which works well with ReLU. \cite{ReLU}
 
+The lowest testing error we got was $0.48274$, which was worse than XGBoost's.
+
 \subsection{One-Layer Network}
 We first trained two-layer networks. We tested different numbers of units in the hidden layer. Since there are 498 input features, the first layer has 498 units and there are two output units. We read online that it is generally better to normalize the input data before feeding it into the network, so we normalized the data. We used 80\% of the training data for training and cross-validated on 20\% of the data. The picture below is a picture of the terminal output when training the neural network. The lasagne package prints out its own values for cross-validation and training error each epoch as it trains itself on the training dataset. You can see that we should have stopped training the neural network after epoch 14 since the cross-validation error consistently when up after that epoch, meaning that the network started to overfit. At the end of training, the python script prints out the log-loss error on the cross-validation set. 
 
@@ -299,6 +301,30 @@ To experiment, we built a three-layer neural network using dropout and batch nor
   However, we were unable to improve our results beyond what XGBoost achieved. Using weights $[\frac{1}{3}, \frac{1}{3}, \frac{1}{3}]$ gave a testing error of $0.46692$ (worse than our best by $0.0099$), and using weights $[.6, .2, .2]$ gave a testing error of $0.46017$ (worse than our best by $0.0032$). Thus, it seems that as we weight the XGBoost model more in the ensemble, it achieves a better testing result, which is simply telling us that XGBoost is the best model and that the other two models do not correct whatever overfitting remains.
 
 \section{Result}
+  This project worked on finding a solution to the BNP Paribas Cardif Claims Management Kaggle competition. The competition is to use machine learning algorithms to effectively classify claims with anonymized data into two classes with minimal error:
+
+  \begin{enumerate}
+    \item claims for which approval could be accelerated leading to faster payments
+    \item claims for which additional information is required before approval
+  \end{enumerate}
+
+  We tried using XGBoost (extreme gradient boost), logistic regression, and neural networks, making use of Python machine learning libraries including xgboost, scikit-learn, scipy.optimize, lasagne, and theano.
+
+  We achieved our best result log-loss error (0.45695, ranking 490 on the Kaggle leaderboard) using the XGBoost package and algorithm with final parameters:
+
+  \begin{lstlisting}
+max_depths = 16
+min_child_weights = 1
+gammas = 0
+colsample_bytrees = 0.68
+subsamples = 0.5
+num_round = 1800
+eta = 0.01
+  \end{lstlisting}
+
+  We preprocessed the data using OneHotEncoding for categorical variables so that they could be treated numerically, and impute missing data using the mean strategy for our logistic regression and neural network models. Our best Logistic Regression results were achieved with a regularization parameter of $0.9296875$. Our best neural network results were achieved with 2 layers, 200 units in the first hidden layer, and 50 unites in the second layer.
+
+  We suspected our extreme gradient boost model of overfitting because its training error was significantly lower than its testing error, so we employed a bagged ensemble approach averaging all 3 models. However, our other 2 models were sufficiently worse than XGBoost that including them only yielded an increase in error.
 
 \section{Responsibilities}
   % Within your document, please try to describe to the best of your ability who was responsible for which aspects (which learners, etc.), and how the team as a whole put the ideas together. Try to be concrete, e.g., who proposed idea X; who implemented algorithm X; who wrote Section X.
