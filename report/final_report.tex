@@ -121,7 +121,7 @@
 \section{Boosted Trees}
   % Daniel will cover this
 
-  Following suggestions on the forum, we implemented boosted trees using the XGBoost library, which stands for eXtreme gradient boosting. The library is designed an optimized for boosted tree algorithms. We utilized the Python package for this library. The classifier uses an ensemble of trees.
+  Following suggestions on the forum, we implemented boosted trees using the XGBoost library, which stands for eXtreme gradient boosting. The library is designed and optimized for boosted tree algorithms. We utilized the Python package for this library. The classifier uses an ensemble of trees.
 
   The seven parameters that we optimize are shown below:
 
@@ -218,10 +218,78 @@ eta = 0.01
       This gave us a testing error of 0.45695 and the training was 0.286874075363. The runtime was approximately 4 hours.
 
 \section{Neural Networks}
+The Kaggle forums indicated that there was not much success using neural networks for this dataset. However, we attempted to build neural network models to help build the ensemble and to gain experience building neural nets. We trained a variety of different neural network architectures using the Theano Python libraries. We also used Lasagne which is a module built on top of Theano. All of the neural network structures has 498 input units and 2 output units. The 2 output units are softmax units, which have output between 0 and 1. We used rectified linear units (ReLU) in the hidden layer because we trained deep neural networks, which works well with ReLU. \cite{ReLU}
+
+\subsection{One-Layer Network}
+We first trained two-layer networks. We tested different numbers of units in the hidden layer. Since there are 498 input features, the first layer has 498 units and there are two output units. We read online that it is generally better to normalize the input data before feeding it into the network, so we normalized the data. We used 80\% of the training data for training and cross-validated on 20\% of the data. The picture below is a picture of the terminal output when training the neural network. The lasagne package prints out its own values for cross-validation and training error each epoch as it trains itself on the training dataset. You can see that we should have stopped training the neural network after epoch 14 since the cross-validation error consistently when up after that epoch, meaning that the network started to overfit. At the end of training, the python script prints out the log-loss error on the cross-validation set. 
+
+      \begin{center}
+        \includegraphics[scale=0.45]{nn1.jpg}
+      \end{center}  
+
+Below are the results for different numbers of hidden units. As you can see, all three networks are clearly overfitting since the cross-validation error is higher than the training error. Therefore, we took steps to try to address this issue. 
+
+      \begin{center}
+          \begin{tabular}{ | l | l | l | l | p{5cm} |}
+          \hline
+          Hidden Units & cv log-loss & training log-loss & epochs \\ \hline
+          150 & 0.4978 & 0.45454 & 25 \\ \hline
+          100 & 0.493 & 0.46028 & 25 \\ \hline
+          50 & 0.4923 & 0.46281 & 25 \\ \hline 
+          \end{tabular}
+      \end{center}
+
+\subsection{Dropout}
+In order to prevent overfitting, we implemented a neural network with dropout layers. Though dropout is a technique particularly useful for deep neural networks, we tried the dropout layers to see its effect. Dropout prevents neural networks from overfitting by randomly dropping units and their connections with a probability, p .\cite{Dropout} The results are below for the same networks as above with dropout implemented in the hidden layer with probability of dropout set to 0.5. Including dropout causes the training error to decrease more slowly, but the the cross-validation error decreased for all three networks. 
+
+      \begin{center}
+          \begin{tabular}{ | l | l | l | l | p{5cm} |}
+          \hline
+          Hidden Units & cv log-loss & training log-loss & epochs \\ \hline
+          150 & 0.4844 & 0.47525 & 100 \\ \hline
+          100 & 0.4845 & 0.47909 & 100 \\ \hline
+          50 & 0.4831 & 0.47761 & 100 \\ \hline 
+          \end{tabular}
+      \end{center}
+
+\subsection{Two-Layer Network}
+Rather than implementing PCA for feature selection and then using those features as input to the 1-hidden layer network, we tried implementing a two-layer network because deep neural networks select the relevant features itself. We used dropout in both layers because when testing with dropout in only one layer, overfitting occurred. The probability in the dropout layers was set to 0.5, the default value. 
+
+      \begin{center}
+          \begin{tabular}{ | l | l | l | l | p{5cm} |}
+          \hline
+          Layer 1 Hidden Units & Layer 2 Hidden Units & cv log-loss & training log-loss & epochs \\ \hline
+          200 & 50 & 0.4806 & 0.48322 & 100 \\ \hline
+          150 & 100 & 0.4854 & 0.48089 & 100 \\ \hline
+          150 & 50 & 0.4824 & 0.48540 & 100 \\ \hline
+          150 & 20 & 0.4870 & 0.48982 & 100 \\ \hline
+          % 100 & 50 & 0.4824 & 0.48540 & 100 \\ \hline
+          % 100 & 20 & 0.4824 & 0.48540 & 100 \\ \hline
+          % 100 & 10 & 0.4824 & 0.48540 & 100 \\ \hline
+          \end{tabular}
+      \end{center}
+
+\subsection{Batch Normalization}
+
+
+
+      \begin{center}
+          \begin{tabular}{ | l | l | l | l | p{5cm} |}
+          \hline
+          Layer 1 Hidden Units & Layer 2 Hidden Units & cv log-loss & training log-loss & epochs \\ \hline
+          % 200 & 100 & 0.47525 & & 100 \\ \hline
+          % 200 & 50 & 0.47525 & & 100 \\ \hline
+          % 200 & 20 & 0.47525 & & 100 \\ \hline
+          150 & 100 & 0.4854 & 0.48089 & 100 \\ \hline
+          150 & 50 & 0.4824 & 0.48540 & 100 \\ \hline
+          % 150 & 20 & 0.47525 & & 100 \\ \hline
+          % 100 & 50 & 0.4824 & 0.48540 & 100 \\ \hline
+          % 100 & 20 & 0.4824 & 0.48540 & 100 \\ \hline
+          % 100 & 10 & 0.4824 & 0.48540 & 100 \\ \hline
+          \end{tabular}
+      \end{center}
 
 \section{Ensemble}
-
-\section{Cross Validation}
 
 \section{Result}
 
@@ -232,8 +300,18 @@ eta = 0.01
     Daniel implemented the One Hot Encoding, which improved the performance of our classifiers by encoding the categorical data correctly. In addition, he implemented the boosted trees using XGBoost, and also ran the parameter tuning for that classifier. He assisted with the implementation of cross validation, especially K-Fold. For all of these contributions, he wrote up the corresponding sections in this report. In addition to those sections, he wrote up the introduction and data sections.
 
   \subsection{Andrew Kim}
+    Andrew implemented the neural networks using a variety of different network architectures and tuning techniques. He researched papers on how to improve neural network training. He helped implement the cross-validation fold and wrote the code that normalized the dataset. He wrote the sections on these areas in this report. 
 
   \subsection{Benjamin Packer}
+
+\begin{thebibliography}{1}
+  \bibitem{ReLU}
+    Hinton, Geoffrey E. "Rectified Linear Units Improve Restricted Boltzmann Machines." (2010). 
+  \bibitem{Dropout}
+    Srivastava, Nitish, Geoffrey Hinton, Alex Krizhevsky, Ilya Sutskever, and Ruslan Salakhutdinov. "Dropout: A Simple Way to Prevent Neural Networks from Overfitting." Journal of Machine Learning (2014): 1929-958. Web. 
+  \bibitem{Batch_normalization}
+    Ioffe, Sergey, and Christian Szegedy. "Batch Normalization: Accelerating Deep Network Training B Y Reducing Internal Covariate Shift." (2015).
+\end{thebibliography}
 
 \end{document}
 
