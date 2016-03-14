@@ -284,10 +284,10 @@ Rather than implementing PCA for feature selection and then using those features
           \end{tabular}
       \end{center}
 
-As you can see in the results, we achieved the lowest cross-validation error with the neural network with 200 hidden units in the first layer and 50 units in the second layer. What was interesting was that the training log-loss error was higher than the cross-validation error for some networks. This may be because the validation set contains data that is \"easier\" to predict or excessive regularization due to dropout. 
+As you can see in the results, we achieved the lowest cross-validation error with the neural network with 200 hidden units in the first layer and 50 units in the second layer. What was interesting was that the training log-loss error was higher than the cross-validation error for some networks. This may be because the validation set contains data that is \"easier\" to predict or excessive regularization due to dropout. In general, a higher number of parameters results in the neural network to overfit on the training data, but regularizing prevents overfitting. 
 
 \subsection{Batch Normalization}
-To experiment, we built a three-layer neural network using dropout and batch normalization. Since the number of parameters is higher in a three-layer network, we used batch normalization to address the \"internal covariate shift\" problem. \cite{Batch_normalization} The network had 200 hidden units in the first layer with batch normalization, 80 hidden units in the second layer with dropout, and 20 hidden units in the third layer with dropout. The cross-validation error was 0.4836 and the training error was 0.46089 after 75 epochs. 
+To experiment, we built a three-layer neural network using dropout and batch normalization. Since the number of parameters is higher in a three-layer network, we used batch normalization to address the internal covariate shift problem. \cite{Batch_normalization} The network had 200 hidden units in the first layer with batch normalization, 80 hidden units in the second layer with dropout, and 20 hidden units in the third layer with dropout. The cross-validation error was 0.4836 and the training error was 0.46089 after 75 epochs. We wanted to explore this approach further and tune parameters, but the long training times made it difficult to do so.
 
 \section{Ensemble}
   \subsection{Motivation}
