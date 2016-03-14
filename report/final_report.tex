@@ -54,7 +54,7 @@
 \begin{document}
 \clearpage
 \thispagestyle{empty}
-\centerline{\Large {\bf Team DAB: } CS74/174 Homework \#3}
+\centerline{\Large {\bf Team DAB: } CS74/174 Final Project}
 \centerline{Machine Learning and Statistical Data Analysis: Winter 2016}
 \centerline{{\bf D}aniel Chen, {\bf A}ndrew Kim, {\bf B}enjamin Packer}
 % \vspace{1cm}
@@ -115,9 +115,9 @@
     One issue with one-hot-encoding was that we had to remove one of the categorical features, v22. This is because this feature had over 1000 unique values, so it increased the number of features to a number which was computation cumbersome. We prefer the empirical increase in performance to the loss of this single feature.
 
     Our original logistic regression without one hot encoding achieved an error of 0.49859. After switching to one-hot-encoding our error significantly to 0.48213.
-    
+
   \subsection{Missing Values}
-    There was lots of missing data in both the testing and training sets, which was a problem for both our Logistic Regression classifier and our Neural Networks, which XGBoost could handle missing values. Our first intuition was to impute each missing data value with the mean value for each feature, which seemed to work well. 
+    There was lots of missing data in both the testing and training sets, which was a problem for both our Logistic Regression classifier and our Neural Networks, which XGBoost could handle missing values. Our first intuition was to impute each missing data value with the mean value for each feature, which seemed to work well.
 
     However, we also experimented with setting the missing values to the median of the missing data. Using the mean imputation strategy and our other best logistic regression parameters, we achieved a 5-fold cross validation error of $0.483757535773$. Using the median achieved an error of $0.483781376194$, which is worse by a negligible $0.000024$. The differences in the error were very small.
 
@@ -237,13 +237,13 @@ The Kaggle forums indicated that there was not much success using neural network
 The lowest testing error we got was $0.48274$, which was worse than XGBoost's.
 
 \subsection{One-Layer Network}
-We first trained two-layer networks. We tested different numbers of units in the hidden layer. Since there are 498 input features, the first layer has 498 units and there are two output units. We read online that it is generally better to normalize the input data before feeding it into the network, so we normalized the data. We used 80\% of the training data for training and cross-validated on 20\% of the data. The picture below is a picture of the terminal output when training the neural network. The lasagne package prints out its own values for cross-validation and training error each epoch as it trains itself on the training dataset. You can see that we should have stopped training the neural network after epoch 14 since the cross-validation error consistently when up after that epoch, meaning that the network started to overfit. At the end of training, the python script prints out the log-loss error on the cross-validation set. 
+We first trained two-layer networks. We tested different numbers of units in the hidden layer. Since there are 498 input features, the first layer has 498 units and there are two output units. We read online that it is generally better to normalize the input data before feeding it into the network, so we normalized the data. We used 80\% of the training data for training and cross-validated on 20\% of the data. The picture below is a picture of the terminal output when training the neural network. The lasagne package prints out its own values for cross-validation and training error each epoch as it trains itself on the training dataset. You can see that we should have stopped training the neural network after epoch 14 since the cross-validation error consistently when up after that epoch, meaning that the network started to overfit. At the end of training, the python script prints out the log-loss error on the cross-validation set.
 
       \begin{center}
         \includegraphics[scale=0.45]{nn1.jpg}
-      \end{center}  
+      \end{center}
 
-Below are the results for different numbers of hidden units. As you can see, all three networks are clearly overfitting since the cross-validation error is higher than the training error. Therefore, we took steps to try to address this issue. 
+Below are the results for different numbers of hidden units. As you can see, all three networks are clearly overfitting since the cross-validation error is higher than the training error. Therefore, we took steps to try to address this issue.
 
       \begin{center}
           \begin{tabular}{ | l | l | l | l | p{5cm} |}
@@ -251,12 +251,12 @@ Below are the results for different numbers of hidden units. As you can see, all
           Hidden Units & cv log-loss & training log-loss & epochs \\ \hline
           150 & 0.4978 & 0.45454 & 25 \\ \hline
           100 & 0.493 & 0.46028 & 25 \\ \hline
-          50 & 0.4923 & 0.46281 & 25 \\ \hline 
+          50 & 0.4923 & 0.46281 & 25 \\ \hline
           \end{tabular}
       \end{center}
 
 \subsection{Dropout}
-In order to prevent overfitting, we implemented a neural network with dropout layers. Though dropout is a technique particularly useful for deep neural networks, we tried the dropout layers to see its effect. Dropout prevents neural networks from overfitting by randomly dropping units and their connections with a probability, p.\cite{Dropout} The results are below for the same networks as above with dropout implemented in the hidden layer with probability of dropout set to 0.5. Including dropout causes the training error to decrease more slowly, but the the cross-validation error decreased for all three networks. 
+In order to prevent overfitting, we implemented a neural network with dropout layers. Though dropout is a technique particularly useful for deep neural networks, we tried the dropout layers to see its effect. Dropout prevents neural networks from overfitting by randomly dropping units and their connections with a probability, p.\cite{Dropout} The results are below for the same networks as above with dropout implemented in the hidden layer with probability of dropout set to 0.5. Including dropout causes the training error to decrease more slowly, but the the cross-validation error decreased for all three networks.
 
       \begin{center}
           \begin{tabular}{ | l | l | l | l | p{5cm} |}
@@ -264,12 +264,12 @@ In order to prevent overfitting, we implemented a neural network with dropout la
           Hidden Units & cv log-loss & training log-loss & epochs \\ \hline
           150 & 0.4844 & 0.47525 & 100 \\ \hline
           100 & 0.4845 & 0.47909 & 100 \\ \hline
-          50 & 0.4831 & 0.47761 & 100 \\ \hline 
+          50 & 0.4831 & 0.47761 & 100 \\ \hline
           \end{tabular}
       \end{center}
 
 \subsection{Two-Layer Network}
-Rather than implementing PCA for feature selection and then using those features as input to the 1-hidden layer network, we tried implementing a two-layer network because deep neural networks select the relevant features itself. We used dropout in both layers because when testing with dropout in only one layer, overfitting occurred. The probability in the dropout layers was set to 0.5, the default value. 
+Rather than implementing PCA for feature selection and then using those features as input to the 1-hidden layer network, we tried implementing a two-layer network because deep neural networks select the relevant features itself. We used dropout in both layers because when testing with dropout in only one layer, overfitting occurred. The probability in the dropout layers was set to 0.5, the default value.
 
       \begin{center}
           \begin{tabular}{ | l | l | l | l | p{5cm} |}
@@ -286,7 +286,7 @@ Rather than implementing PCA for feature selection and then using those features
           \end{tabular}
       \end{center}
 
-As you can see in the results, we achieved the lowest cross-validation error with the neural network with 200 hidden units in the first layer and 50 units in the second layer. What was interesting was that the training log-loss error was higher than the cross-validation error for some networks. This may be because the validation set contains data that is \"easier\" to predict or excessive regularization due to dropout. In general, a higher number of parameters results in the neural network to overfit on the training data, but regularizing prevents overfitting. 
+As you can see in the results, we achieved the lowest cross-validation error with the neural network with 200 hidden units in the first layer and 50 units in the second layer. What was interesting was that the training log-loss error was higher than the cross-validation error for some networks. This may be because the validation set contains data that is \"easier\" to predict or excessive regularization due to dropout. In general, a higher number of parameters results in the neural network to overfit on the training data, but regularizing prevents overfitting.
 
 \subsection{Batch Normalization}
 To experiment, we built a three-layer neural network using dropout and batch normalization. Since the number of parameters is higher in a three-layer network, we used batch normalization to address the internal covariate shift problem. \cite{Batch_normalization} The network had 200 hidden units in the first layer with batch normalization, 80 hidden units in the second layer with dropout, and 20 hidden units in the third layer with dropout. The cross-validation error was 0.4836 and the training error was 0.46089 after 75 epochs. We wanted to explore this approach further and tune parameters, but the long training times made it difficult to do so.
@@ -333,16 +333,16 @@ eta = 0.01
     Daniel implemented the One Hot Encoding, which improved the performance of our classifiers by encoding the categorical data correctly. In addition, he implemented the boosted trees using XGBoost, and also ran the parameter tuning for that classifier. He assisted with the implementation of cross validation, especially K-Fold. For all of these contributions, he wrote up the corresponding sections in this report. In addition to those sections, he wrote up the introduction and data sections.
 
   \subsection{Andrew Kim}
-    Andrew implemented the neural networks using a variety of different network architectures and tuning techniques. He researched papers on how to improve neural network training. He helped implement the cross-validation fold and wrote the code that normalized the dataset. He wrote the sections on these areas in this report. 
+    Andrew implemented the neural networks using a variety of different network architectures and tuning techniques. He researched papers on how to improve neural network training. He helped implement the cross-validation fold and wrote the code that normalized the dataset. He wrote the sections on these areas in this report.
 
   \subsection{Benjamin Packer}
     Ben implemented the missing values imputer, the process of producing an ensemble given several output csv's, some additional code to optimize the weights the ensemble assignmed each classifier, the logistic regression classifier including the parameter tuning and optimization, and the initial helper functions for reading and writing data from and to csv's. He has written the corresponding sections for the ensemble model, the logistic regression classifier, and the section on missing values.
 
 \begin{thebibliography}{1}
   \bibitem{ReLU}
-    Hinton, Geoffrey E. "Rectified Linear Units Improve Restricted Boltzmann Machines." (2010). 
+    Hinton, Geoffrey E. "Rectified Linear Units Improve Restricted Boltzmann Machines." (2010).
   \bibitem{Dropout}
-    Srivastava, Nitish, Geoffrey Hinton, Alex Krizhevsky, Ilya Sutskever, and Ruslan Salakhutdinov. "Dropout: A Simple Way to Prevent Neural Networks from Overfitting." Journal of Machine Learning (2014): 1929-958. Web. 
+    Srivastava, Nitish, Geoffrey Hinton, Alex Krizhevsky, Ilya Sutskever, and Ruslan Salakhutdinov. "Dropout: A Simple Way to Prevent Neural Networks from Overfitting." Journal of Machine Learning (2014): 1929-958. Web.
   \bibitem{Batch_normalization}
     Ioffe, Sergey, and Christian Szegedy. "Batch Normalization: Accelerating Deep Network Training B Y Reducing Internal Covariate Shift." (2015).
 \end{thebibliography}
