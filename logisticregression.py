@@ -1,14 +1,14 @@
-from utils import load_data, log_loss, write_submission
+from utils import load_data, log_loss, write_submission, cv_kfold_cross_validation
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import Imputer
 import time
 from datetime import datetime
+from scipy.optimize import minimize
+import numpy as np
 
 output_y_hat_train = False
 output_y_hat_test = True
 
-# Using all default values for now
-classifier = LogisticRegression()
 imputer = Imputer()
 
 start = time.time()
@@ -16,44 +16,58 @@ print 'Loading data...'
 train_data, test_data = load_data()
 print '...done loading data. Took {0} seconds'.format(time.time() - start)
 
-print 'Imputing missing X values in training data...'
+print 'Imputing mmissing X values in training data...'
 start = time.time()
 train_data['x'] = imputer.fit_transform(train_data['x'])
 print '...done imputing. Took {0} seconds'.format(time.time() - start)
-
-start = time.time()
-print 'Training model...'
-classifier.fit(train_data['x'], train_data['y'].tolist())
-print '...model trained. Took {0} seconds'.format(time.time() - start)
-
-start = time.time()
-print 'Retrieving training error...'
-y_hat_train = classifier.predict_proba(train_data['x'])[:,1]
-if output_y_hat_train:
-    start1 = time.time()
-    print 'Writing training output...'
-    write_submission(train_data['ids'], y_hat_train, 'logistic-regression-output-{}.csv'.format(datetime.now()), True)
-    print '...output written. Took {0} seconds'.format(time.time() - start1)
-
-error = log_loss(train_data['y'], classifier.predict_proba(train_data['x'])[:, 1])
-print 'TRAINING ERROR: {}'.format(error)
-print '...Took {} seconds'.format(time.time() - start)
 
 print 'Imputing missing X values in testing data...'
 start = time.time()
 test_data['x'] = imputer.fit_transform(test_data['x'])
 print '...done imputing. Took {0} seconds'.format(time.time() - start)
 
-start = time.time()
-print 'Generating predictions on testing date...'
-y_hat = classifier.predict_proba(test_data['x'])
-print '...predictions generated. Took {0} seconds'.format(time.time() - start)
+def param_tuning(train_data, test_data):
+    # y_hat = predict_func(model, x_test)
+    def predict_func(model, x_test):
+        print 'Predicting...'
+        start = time.time()
+        y_hat = model.predict_proba(x_test)
+        print '...done. Took {0} seconds'.format(time.time() - start)
+        return y_hat[:, 1]
 
+    # error = eval_func(y_test, y_hat)
+    def eval_func(y_test, y_hat):
+        print 'Calculating error...'
+        start = time.time()
+        error = log_loss(y_test, y_hat)
+        print '...done. Took {0} seconds'.format(time.time() - start)
+        return error
 
-if output_y_hat_test:
-    start = time.time()
-    print 'Writing output...'
-    write_submission(
-        test_data['ids'], y_hat[:, 1], 'logistic-regression-output-{}.csv'.format(datetime.now()), True
-    )
-    print '...output written. Took {0} seconds'.format(time.time() - start)
+    c_dict = {}
+
+    def objective_function(c):
+        if not (0 < c[0] <= 1):
+            return float('inf')
+
+        # model = train_func(x_train, y_train)
+        def train_func(x_train, y_train):
+            print 'Training...'
+            start = time.time()
+            classifier = LogisticRegression(C=c[0], solver='liblinear', n_jobs=-1)
+            classifier.fit(x_train, y_train.tolist())
+            print '...done. Took {0} seconds'.format(time.time() - start)
+            return classifier
+
+        print 'Trying with C: {}'.format(c)
+        error = cv_kfold_cross_validation(train_data['x'], train_data['y'], train_func, predict_func, eval_func, 5)
+        print 'Got error: {}'.format(error)
+        c_dict[c[0]] = error
+        return error
+
+    C0 = [1.0]
+    results = minimize(objective_function, C0, method='nelder-mead', options={'xtol': 1e-8, 'disp': True})
+    best_c = results['x']
+    print 'Best C is {0}'.format(best_c)
+    print c_dict
+
+param_tuning(train_data, test_data)
