@@ -215,18 +215,20 @@ rounds_and_eta = [(200, 0.05), (300, 0.01)]
 
       Although we did not end up using the optimal results from our tuning, it provided valuable insights to how we can use the parameters to achieve better results. Ultimately the results from our tuning was leading us to areas where this kind of brute force technique towards parameter tuning would become too computationally expensive, as tuning 2 already took nearly 12 hours to run.
 
+      Mostly we spent time modifying eta, max\_depth, and colsample\_bytree.
+
       Ultimately, the parameters that we came up with were:
       \begin{lstlisting}
-max_depths =
-min_child_weights =
-gammas =
-colsample_bytrees =
-subsamples =
-num_round =
-eta =
+max_depths = 16
+min_child_weights = 1
+gammas = 0
+colsample_bytrees = 0.68
+subsamples = 0.5
+num_round = 1800
+eta = 0.01
       \end{lstlisting}
 
-      This gave us a testing error of XXXX. The runtime was XXXX.
+      This gave us a testing error of 0.45695 and the training was 0.286874075363. The runtime was approximately 4 hours.
 
 \section{Neural Networks}
 
